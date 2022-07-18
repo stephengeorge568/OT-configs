@@ -1,0 +1,35 @@
+version: '3.1'
+
+services:
+
+  ot-editor:
+    container_name: 'ot-editor'
+    restart: unless-stopped
+    image: ot-editor:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./production2.conf:/etc/nginx/conf.d/default.conf
+        #- ./production-site:/usr/share/nginx/html
+      - ./dh-param/dhparam-2048.pem:/etc/ssl/certs/dhparam-2048.pem
+      - /docker-volumes/etc/letsencrypt/live/stepheng.dev/fullchain.pem:/etc/letsencrypt/live/stepheng.dev/fullchain.pem
+      - /docker-volumes/etc/letsencrypt/live/stepheng.dev/privkey.pem:/etc/letsencrypt/live/stepheng.dev/privkey.pem
+    networks:
+      - docker-network
+
+  ot-server:
+    container_name: 'ot-server'
+    restart: unless-stopped
+    image: ot-server:latest
+    ports:
+      - "8443:8443"
+    volumes:
+      - /etc/letsencrypt/live/stepheng.dev/keystore.p12:/etc/letsencrypt/live/stepheng.dev/keystore.p12
+        # - /docker-volumes/etc/letsencrypt/live/stepheng.dev/keystore.p12:/etc/letsencrypt/live/stepheng.dev/keystore.p12
+    networks:
+      - docker-network
+
+networks:
+  docker-network:
+    driver: bridge
